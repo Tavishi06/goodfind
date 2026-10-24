@@ -389,7 +389,7 @@
           <div class="search-wrap">
             <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8" stroke="currentColor" stroke-width="1.8"/><path d="m16 16 4.2 4.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
             <input id="search" type="search" placeholder="Search products…" autocomplete="off" aria-label="Search products">
-            <span class="shortcut" aria-hidden="true">⌘ K</span>
+            <span class="shortcut" id="search-shortcut" aria-hidden="true">Ctrl K</span>
           </div>
         </section>
 
@@ -453,6 +453,7 @@
         const priceHint = document.querySelector("#price-hint");
         const filterPanel = document.querySelector("#filters");
         const activeFilterCount = document.querySelector("#active-filter-count");
+        const searchShortcut = document.querySelector("#search-shortcut");
         const mobileLayout = window.matchMedia("(max-width: 640px)");
         let products = [];
 
@@ -521,7 +522,7 @@
           const min = minInput.value === "" ? null : Number(minInput.value);
           const max = maxInput.value === "" ? null : Number(maxInput.value);
           const filtered = products.filter(product => {
-            const searchable = `${product.title} ${product.brand || ""}`.toLocaleLowerCase();
+            const searchable = `${product.title} ${product.brand || ""} ${product.category || ""}`.toLocaleLowerCase();
             return (!query || searchable.includes(query))
               && (!category || product.category === category)
               && (min === null || product.price >= min)
@@ -542,9 +543,15 @@
           activeFilterCount.textContent = active ? `· ${active}` : "";
           const low = minInput.value === "" ? null : Number(minInput.value);
           const high = maxInput.value === "" ? null : Number(maxInput.value);
-          priceHint.textContent = low !== null || high !== null
-            ? `${low === null ? "$0" : money(low)} – ${high === null ? "any price" : money(high)}`
-            : "Any price";
+          if (low !== null && high !== null && low > high) {
+            priceHint.textContent = "Minimum price is greater than maximum.";
+            priceHint.style.color = "#a33b32";
+          } else {
+            priceHint.textContent = low !== null || high !== null
+              ? `${low === null ? "$0" : money(low)} – ${high === null ? "any price" : money(high)}`
+              : "Any price";
+            priceHint.style.color = "";
+          }
         }
 
         function render() {
@@ -607,7 +614,7 @@
           } catch (error) {
             grid.setAttribute("aria-busy", "false");
             countOutput.textContent = "Catalogue unavailable";
-            grid.innerHTML = '<div class="status-state"><h3>We couldn’t load the catalogue</h3><p>Please check your connection and try again.</p><button class="primary-button" type="button" id="retry">Try again</button></div>';
+            grid.innerHTML = '<div class="status-state"><h3>We couldn’t load the catalogue</h3><p>Check your internet connection, then try loading the catalogue again.</p><button class="primary-button" type="button" id="retry">Try again</button></div>';
             grid.querySelector("#retry").addEventListener("click", loadProducts);
             console.error("Unable to load product catalogue:", error);
           }
@@ -618,6 +625,22 @@
           control.addEventListener("change", render);
         });
         document.querySelector("#clear-filters").addEventListener("click", clearFilters);
+
+        // Keep the visible shortcut accurate and make it work on Windows/Linux and macOS.
+        const isMac = /Mac|iPhone|iPad|iPod/i.test(navigator.platform);
+        searchShortcut.textContent = isMac ? "⌘ K" : "Ctrl K";
+        document.addEventListener("keydown", event => {
+          if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
+            event.preventDefault();
+            searchInput.focus();
+            searchInput.select();
+          }
+          if (event.key === "Escape" && document.activeElement === searchInput) {
+            searchInput.value = "";
+            render();
+          }
+        });
+
         mobileLayout.addEventListener("change", setPanelForViewport);
         setPanelForViewport();
         loadProducts();
