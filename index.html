@@ -1,0 +1,627 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f7f7f2">
+    <title>Goodfind — thoughtful finds, faster</title>
+    <meta name="description" content="Find your next favorite with quick product search and simple filters.">
+    <style>
+      :root {
+        color-scheme: light;
+        --ink: #1e2d2a;
+        --muted: #78817c;
+        --line: #e7e9e2;
+        --paper: #fff;
+        --canvas: #f7f7f2;
+        --accent: #32695a;
+        --accent-dark: #254f43;
+        --accent-soft: #e7f0e9;
+        --gold: #d49a35;
+        --shadow: 0 10px 30px rgb(30 45 42 / 5%);
+      }
+
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: var(--canvas);
+        color: var(--ink);
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        font-size: 15px;
+        -webkit-font-smoothing: antialiased;
+      }
+      button, input, select { font: inherit; }
+      button, select { cursor: pointer; }
+      button:focus-visible, input:focus-visible, select:focus-visible, summary:focus-visible {
+        outline: 3px solid #91baa9;
+        outline-offset: 2px;
+      }
+      .shell { max-width: 1440px; margin: 0 auto; padding: 0 48px; }
+      header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        height: 82px;
+        border-bottom: 1px solid var(--line);
+      }
+      .brand {
+        display: inline-flex;
+        align-items: center;
+        gap: 11px;
+        color: var(--ink);
+        text-decoration: none;
+        font-size: 21px;
+        font-weight: 760;
+        letter-spacing: -1px;
+      }
+      .brand-mark {
+        display: grid;
+        width: 34px;
+        height: 34px;
+        place-items: center;
+        border-radius: 11px;
+        background: var(--accent);
+        color: white;
+      }
+      .brand-mark svg { width: 21px; height: 21px; }
+      .header-note { color: var(--muted); font-size: 13px; }
+      main { padding: 47px 0 72px; }
+      .intro { margin-bottom: 31px; }
+      .eyebrow {
+        margin: 0 0 10px;
+        color: var(--accent);
+        font-size: 11px;
+        font-weight: 750;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+      }
+      h1 {
+        margin: 0;
+        font-size: clamp(32px, 4vw, 48px);
+        font-weight: 690;
+        letter-spacing: -2.3px;
+        line-height: 1.08;
+      }
+      .intro-copy { margin: 12px 0 0; color: var(--muted); font-size: 15px; }
+      .search-wrap { position: relative; max-width: 670px; margin-top: 25px; }
+      .search-wrap svg {
+        position: absolute;
+        top: 50%;
+        left: 17px;
+        width: 19px;
+        height: 19px;
+        color: #89938d;
+        transform: translateY(-50%);
+        pointer-events: none;
+      }
+      .search-wrap input {
+        width: 100%;
+        height: 54px;
+        padding: 0 48px;
+        border: 1px solid #dfe4dc;
+        border-radius: 13px;
+        background: white;
+        box-shadow: 0 4px 14px rgb(30 45 42 / 3%);
+        color: var(--ink);
+      }
+      .search-wrap input::placeholder { color: #9ba39e; }
+      .search-wrap input:focus { border-color: #8db6a3; outline: none; box-shadow: 0 0 0 4px rgb(50 105 90 / 10%); }
+      .shortcut {
+        position: absolute;
+        top: 50%;
+        right: 14px;
+        padding: 4px 7px;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        color: #9ba39e;
+        font-size: 11px;
+        transform: translateY(-50%);
+      }
+      .catalogue {
+        display: grid;
+        grid-template-columns: 235px minmax(0, 1fr);
+        align-items: start;
+        gap: 34px;
+      }
+      .filters-panel {
+        position: sticky;
+        top: 20px;
+        padding: 20px;
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        background: var(--paper);
+        box-shadow: var(--shadow);
+      }
+      .filters-panel > summary { display: none; }
+      .filter-heading {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 22px;
+      }
+      .filter-heading h2 { margin: 0; font-size: 15px; font-weight: 700; }
+      .text-button {
+        padding: 4px 0;
+        border: 0;
+        background: none;
+        color: var(--accent);
+        font-size: 12px;
+        font-weight: 650;
+      }
+      .filter-group + .filter-group { margin-top: 23px; padding-top: 22px; border-top: 1px solid var(--line); }
+      .filter-label { display: block; margin-bottom: 11px; font-size: 12px; font-weight: 700; }
+      .control {
+        width: 100%;
+        height: 42px;
+        padding: 0 11px;
+        border: 1px solid #e2e6df;
+        border-radius: 9px;
+        background: white;
+        color: var(--ink);
+      }
+      .price-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+      .price-field { position: relative; }
+      .price-field span {
+        position: absolute;
+        top: 50%;
+        left: 11px;
+        color: #8c9690;
+        font-size: 12px;
+        transform: translateY(-50%);
+      }
+      .price-field input { padding-left: 24px; }
+      .price-hint { margin: 9px 0 0; color: var(--muted); font-size: 11px; }
+      .results-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        min-height: 42px;
+        margin-bottom: 17px;
+      }
+      .result-count { color: var(--muted); font-size: 13px; }
+      .result-count strong { color: var(--ink); font-weight: 700; }
+      .sort-wrap { display: flex; align-items: center; gap: 9px; }
+      .sort-wrap label { color: var(--muted); font-size: 12px; white-space: nowrap; }
+      .sort-wrap select {
+        min-width: 154px;
+        height: 38px;
+        padding: 0 30px 0 11px;
+        border: 1px solid #e2e6df;
+        border-radius: 9px;
+        background: white;
+        color: var(--ink);
+        font-size: 12px;
+      }
+      .product-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 19px;
+      }
+      .product-card {
+        overflow: hidden;
+        min-width: 0;
+        border: 1px solid var(--line);
+        border-radius: 15px;
+        background: white;
+        box-shadow: 0 5px 20px rgb(30 45 42 / 3%);
+        transition: transform 160ms ease, box-shadow 160ms ease;
+      }
+      .product-card:hover { transform: translateY(-3px); box-shadow: 0 12px 28px rgb(30 45 42 / 9%); }
+      .product-image {
+        position: relative;
+        display: grid;
+        overflow: hidden;
+        aspect-ratio: 1.15 / 1;
+        place-items: center;
+        background: #f4f5f0;
+      }
+      .product-image img { width: 100%; height: 100%; object-fit: contain; mix-blend-mode: multiply; }
+      .image-fallback { color: #a9b1aa; }
+      .image-fallback svg { width: 38px; height: 38px; }
+      .product-category {
+        position: absolute;
+        top: 12px;
+        left: 12px;
+        max-width: calc(100% - 24px);
+        overflow: hidden;
+        padding: 6px 9px;
+        border: 1px solid rgb(231 233 226 / 80%);
+        border-radius: 30px;
+        background: rgb(255 255 255 / 90%);
+        color: #53645c;
+        font-size: 10px;
+        font-weight: 650;
+        text-overflow: ellipsis;
+        text-transform: capitalize;
+        white-space: nowrap;
+      }
+      .product-info { padding: 14px 15px 15px; }
+      .product-brand {
+        overflow: hidden;
+        margin: 0 0 5px;
+        color: var(--muted);
+        font-size: 10px;
+        font-weight: 650;
+        letter-spacing: .4px;
+        text-overflow: ellipsis;
+        text-transform: uppercase;
+        white-space: nowrap;
+      }
+      .product-title {
+        display: -webkit-box;
+        overflow: hidden;
+        min-height: 42px;
+        margin: 0;
+        color: var(--ink);
+        font-size: 14px;
+        font-weight: 650;
+        letter-spacing: -.2px;
+        line-height: 1.45;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+      }
+      .product-rating { display: flex; align-items: center; gap: 5px; margin-top: 10px; color: var(--muted); font-size: 11px; }
+      .star { color: var(--gold); font-size: 13px; line-height: 1; }
+      .product-price { margin-top: 11px; font-size: 17px; font-weight: 750; letter-spacing: -.4px; }
+      .empty-state, .status-state {
+        grid-column: 1 / -1;
+        padding: 68px 24px;
+        border: 1px dashed #dce2d9;
+        border-radius: 16px;
+        background: rgb(255 255 255 / 60%);
+        text-align: center;
+      }
+      .empty-icon {
+        display: grid;
+        width: 52px;
+        height: 52px;
+        margin: 0 auto 16px;
+        place-items: center;
+        border-radius: 16px;
+        background: var(--accent-soft);
+        color: var(--accent);
+      }
+      .empty-icon svg { width: 24px; height: 24px; }
+      .empty-state h3, .status-state h3 { margin: 0; font-size: 18px; letter-spacing: -.4px; }
+      .empty-state p, .status-state p { margin: 8px 0 17px; color: var(--muted); font-size: 13px; }
+      .primary-button {
+        min-height: 40px;
+        padding: 0 15px;
+        border: 0;
+        border-radius: 9px;
+        background: var(--accent);
+        color: white;
+        font-size: 12px;
+        font-weight: 700;
+      }
+      .primary-button:hover { background: var(--accent-dark); }
+      .spinner {
+        width: 25px;
+        height: 25px;
+        margin: 0 auto 15px;
+        border: 3px solid #e5ece6;
+        border-top-color: var(--accent);
+        border-radius: 50%;
+        animation: spin .8s linear infinite;
+      }
+      @keyframes spin { to { transform: rotate(360deg); } }
+      footer { padding: 20px 0 25px; border-top: 1px solid var(--line); color: var(--muted); font-size: 11px; text-align: center; }
+
+      @media (min-width: 1200px) {
+        .catalogue { grid-template-columns: 235px minmax(0, 1fr); gap: 40px; }
+        .product-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+      }
+      @media (max-width: 900px) {
+        .shell { padding: 0 28px; }
+        .catalogue { grid-template-columns: 205px minmax(0, 1fr); gap: 22px; }
+        .filters-panel { padding: 16px; }
+        .product-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+      }
+      @media (max-width: 640px) {
+        .shell { padding: 0 18px; }
+        header { height: 68px; }
+        .brand { font-size: 19px; }
+        .header-note { display: none; }
+        main { padding: 34px 0 48px; }
+        .intro { margin-bottom: 24px; }
+        h1 { max-width: 390px; font-size: 36px; letter-spacing: -1.8px; }
+        .intro-copy { max-width: 340px; font-size: 13px; line-height: 1.6; }
+        .search-wrap { margin-top: 20px; }
+        .search-wrap input { height: 50px; }
+        .shortcut { display: none; }
+        .catalogue { display: flex; flex-direction: column; gap: 17px; }
+        .filters-panel { position: static; width: 100%; padding: 0; }
+        .filters-panel > summary {
+          display: flex;
+          min-height: 48px;
+          align-items: center;
+          justify-content: space-between;
+          padding: 0 14px;
+          color: var(--ink);
+          font-size: 13px;
+          font-weight: 680;
+          list-style: none;
+          cursor: pointer;
+        }
+        .filters-panel > summary::-webkit-details-marker { display: none; }
+        .filters-panel > summary::after { content: "+"; color: var(--accent); font-size: 19px; font-weight: 400; }
+        .filters-panel[open] > summary::after { content: "−"; }
+        .filter-content { padding: 0 14px 16px; }
+        .filter-heading { display: none; }
+        .filter-group + .filter-group { margin-top: 15px; padding-top: 15px; }
+        .results-area { width: 100%; }
+        .results-top { min-height: 38px; margin-bottom: 12px; }
+        .result-count { font-size: 12px; }
+        .sort-wrap { gap: 6px; }
+        .sort-wrap label { font-size: 11px; }
+        .sort-wrap select { min-width: 133px; height: 36px; font-size: 11px; }
+        .product-grid { width: 100%; gap: 11px; }
+        .product-image { aspect-ratio: .95 / 1; }
+        .product-category { top: 8px; left: 8px; padding: 5px 7px; font-size: 9px; }
+        .product-info { padding: 11px 11px 12px; }
+        .product-title { min-height: 39px; font-size: 12px; }
+        .product-rating { margin-top: 8px; font-size: 10px; }
+        .product-price { margin-top: 9px; font-size: 15px; }
+        .empty-state, .status-state { padding: 48px 16px; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="shell">
+      <header>
+        <a class="brand" href="#" aria-label="Goodfind home">
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M5 12.5 10 17l9-10" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>
+          goodfind
+        </a>
+        <span class="header-note">A little less scrolling. A lot more finding.</span>
+      </header>
+
+      <main>
+        <section class="intro" aria-labelledby="page-title">
+          <p class="eyebrow">The good things, all in one place</p>
+          <h1 id="page-title">Find your next<br>favorite thing.</h1>
+          <p class="intro-copy">A thoughtful edit of everyday finds. Search, browse, and discover something good.</p>
+          <div class="search-wrap">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8" stroke="currentColor" stroke-width="1.8"/><path d="m16 16 4.2 4.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+            <input id="search" type="search" placeholder="Search products…" autocomplete="off" aria-label="Search products">
+            <span class="shortcut" aria-hidden="true">⌘ K</span>
+          </div>
+        </section>
+
+        <section class="catalogue" aria-label="Product catalogue">
+          <details class="filters-panel" id="filters">
+            <summary>Filters <span id="active-filter-count"></span></summary>
+            <div class="filter-content">
+              <div class="filter-heading">
+                <h2>Filters</h2>
+                <button class="text-button" type="button" id="clear-filters">Clear all</button>
+              </div>
+              <div class="filter-group">
+                <label class="filter-label" for="category">Category</label>
+                <select class="control" id="category">
+                  <option value="">All categories</option>
+                </select>
+              </div>
+              <div class="filter-group">
+                <span class="filter-label">Price range</span>
+                <div class="price-inputs">
+                  <label class="price-field"><span>$</span><input class="control" id="min-price" type="number" min="0" step="1" placeholder="Min" aria-label="Minimum price"></label>
+                  <label class="price-field"><span>$</span><input class="control" id="max-price" type="number" min="0" step="1" placeholder="Max" aria-label="Maximum price"></label>
+                </div>
+                <p class="price-hint" id="price-hint">Any price</p>
+              </div>
+            </div>
+          </details>
+
+          <div class="results-area">
+            <div class="results-top">
+              <p class="result-count" id="result-count" aria-live="polite">Loading products…</p>
+              <div class="sort-wrap">
+                <label for="sort">Sort by</label>
+                <select id="sort" aria-label="Sort products">
+                  <option value="featured">Featured</option>
+                  <option value="price-asc">Price: low to high</option>
+                  <option value="price-desc">Price: high to low</option>
+                  <option value="rating-desc">Top rated</option>
+                </select>
+              </div>
+            </div>
+            <div class="product-grid" id="product-grid" aria-live="polite" aria-busy="true">
+              <div class="status-state"><div class="spinner" aria-hidden="true"></div><h3>Finding the good stuff…</h3><p>Just a moment while we load the catalogue.</p></div>
+            </div>
+          </div>
+        </section>
+      </main>
+      <footer>Goodfind · Thoughtful finds, faster</footer>
+    </div>
+
+    <script>
+      (() => {
+        const API_URL = "https://dummyjson.com/products?limit=0";
+        const grid = document.querySelector("#product-grid");
+        const searchInput = document.querySelector("#search");
+        const categoryInput = document.querySelector("#category");
+        const minInput = document.querySelector("#min-price");
+        const maxInput = document.querySelector("#max-price");
+        const sortInput = document.querySelector("#sort");
+        const countOutput = document.querySelector("#result-count");
+        const priceHint = document.querySelector("#price-hint");
+        const filterPanel = document.querySelector("#filters");
+        const activeFilterCount = document.querySelector("#active-filter-count");
+        const mobileLayout = window.matchMedia("(max-width: 640px)");
+        let products = [];
+
+        function prettyCategory(value) {
+          return value.replace(/-/g, " ").replace(/\b\w/g, letter => letter.toUpperCase());
+        }
+
+        function money(value) {
+          return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(value);
+        }
+
+        function imageMarkup(product) {
+          const label = product.title.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+          const image = document.createElement("img");
+          image.src = product.thumbnail || product.images?.[0] || "";
+          image.alt = label;
+          image.loading = "lazy";
+          image.addEventListener("error", () => {
+            const fallback = document.createElement("span");
+            fallback.className = "image-fallback";
+            fallback.setAttribute("aria-hidden", "true");
+            fallback.innerHTML = '<svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="16" rx="2" stroke="currentColor" stroke-width="1.5"/><circle cx="9" cy="10" r="1.5" fill="currentColor"/><path d="m4 17 5-5 4 4 3-3 4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+            image.replaceWith(fallback);
+          }, { once: true });
+          return image;
+        }
+
+        function productCard(product) {
+          const card = document.createElement("article");
+          card.className = "product-card";
+
+          const imageWrap = document.createElement("div");
+          imageWrap.className = "product-image";
+          imageWrap.append(imageMarkup(product));
+          const category = document.createElement("span");
+          category.className = "product-category";
+          category.textContent = prettyCategory(product.category);
+          imageWrap.append(category);
+
+          const info = document.createElement("div");
+          info.className = "product-info";
+          const brand = document.createElement("p");
+          brand.className = "product-brand";
+          brand.textContent = product.brand || prettyCategory(product.category);
+          const title = document.createElement("h2");
+          title.className = "product-title";
+          title.textContent = product.title;
+          const rating = document.createElement("div");
+          rating.className = "product-rating";
+          rating.innerHTML = '<span class="star" aria-hidden="true">★</span>';
+          const ratingValue = document.createElement("span");
+          ratingValue.textContent = Number(product.rating).toFixed(1);
+          rating.append(ratingValue);
+          rating.setAttribute("aria-label", `Rated ${Number(product.rating).toFixed(1)} out of 5`);
+          const price = document.createElement("p");
+          price.className = "product-price";
+          price.textContent = money(product.price);
+          info.append(brand, title, rating, price);
+          card.append(imageWrap, info);
+          return card;
+        }
+
+        function matchingProducts() {
+          const query = searchInput.value.trim().toLocaleLowerCase();
+          const category = categoryInput.value;
+          const min = minInput.value === "" ? null : Number(minInput.value);
+          const max = maxInput.value === "" ? null : Number(maxInput.value);
+          const filtered = products.filter(product => {
+            const searchable = `${product.title} ${product.brand || ""}`.toLocaleLowerCase();
+            return (!query || searchable.includes(query))
+              && (!category || product.category === category)
+              && (min === null || product.price >= min)
+              && (max === null || product.price <= max);
+          });
+          switch (sortInput.value) {
+            case "price-asc": filtered.sort((a, b) => a.price - b.price); break;
+            case "price-desc": filtered.sort((a, b) => b.price - a.price); break;
+            case "rating-desc": filtered.sort((a, b) => b.rating - a.rating); break;
+          }
+          return filtered;
+        }
+
+        function updateFilterDetails() {
+          const active = Number(Boolean(categoryInput.value))
+            + Number(minInput.value !== "")
+            + Number(maxInput.value !== "");
+          activeFilterCount.textContent = active ? `· ${active}` : "";
+          const low = minInput.value === "" ? null : Number(minInput.value);
+          const high = maxInput.value === "" ? null : Number(maxInput.value);
+          priceHint.textContent = low !== null || high !== null
+            ? `${low === null ? "$0" : money(low)} – ${high === null ? "any price" : money(high)}`
+            : "Any price";
+        }
+
+        function render() {
+          updateFilterDetails();
+          const matching = matchingProducts();
+          grid.replaceChildren();
+          grid.setAttribute("aria-busy", "false");
+          countOutput.innerHTML = `<strong>${matching.length}</strong> ${matching.length === 1 ? "find" : "finds"}`;
+
+          if (matching.length === 0) {
+            const empty = document.createElement("div");
+            empty.className = "empty-state";
+            empty.innerHTML = '<div class="empty-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><circle cx="10.8" cy="10.8" r="6.8" stroke="currentColor" stroke-width="1.8"/><path d="m16 16 4.2 4.2M8 10.8h5.6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></div><h3>No finds this time</h3><p>Try another search or loosen up your filters.</p>';
+            const clear = document.createElement("button");
+            clear.type = "button";
+            clear.className = "primary-button";
+            clear.textContent = "Clear search & filters";
+            clear.addEventListener("click", clearFilters);
+            empty.append(clear);
+            grid.append(empty);
+            return;
+          }
+          grid.append(...matching.map(productCard));
+        }
+
+        function clearFilters() {
+          searchInput.value = "";
+          categoryInput.value = "";
+          minInput.value = "";
+          maxInput.value = "";
+          sortInput.value = "featured";
+          render();
+        }
+
+        function setPanelForViewport() {
+          filterPanel.open = !mobileLayout.matches;
+        }
+
+        async function loadProducts() {
+          try {
+            const response = await fetch(API_URL);
+            if (!response.ok) throw new Error(`Product request failed (${response.status}).`);
+            const payload = await response.json();
+            if (!Array.isArray(payload.products) || payload.products.length === 0) {
+              throw new Error("The catalogue response did not contain any products.");
+            }
+            products = payload.products;
+            const categories = [...new Set(products.map(product => product.category))].sort((a, b) => a.localeCompare(b));
+            for (const value of categories) {
+              const option = document.createElement("option");
+              option.value = value;
+              option.textContent = prettyCategory(value);
+              categoryInput.append(option);
+            }
+            const highestPrice = Math.ceil(Math.max(...products.map(product => product.price)));
+            minInput.max = String(highestPrice);
+            maxInput.max = String(highestPrice);
+            priceHint.textContent = `Prices up to ${money(highestPrice)}`;
+            render();
+          } catch (error) {
+            grid.setAttribute("aria-busy", "false");
+            countOutput.textContent = "Catalogue unavailable";
+            grid.innerHTML = '<div class="status-state"><h3>We couldn’t load the catalogue</h3><p>Please check your connection and try again.</p><button class="primary-button" type="button" id="retry">Try again</button></div>';
+            grid.querySelector("#retry").addEventListener("click", loadProducts);
+            console.error("Unable to load product catalogue:", error);
+          }
+        }
+
+        [searchInput, categoryInput, minInput, maxInput, sortInput].forEach(control => {
+          control.addEventListener("input", render);
+          control.addEventListener("change", render);
+        });
+        document.querySelector("#clear-filters").addEventListener("click", clearFilters);
+        mobileLayout.addEventListener("change", setPanelForViewport);
+        setPanelForViewport();
+        loadProducts();
+      })();
+    </script>
+  </body>
+</html>
